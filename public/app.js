@@ -1,0 +1,221 @@
+/**
+ * ARIA Autism Assessment Analyzer - Main Application
+ */
+
+let player;
+let currentCase = null;
+
+// YouTube API Ready callback
+function onYouTubeIframeAPIReady() {
+    console.log('YouTube API ready');
+}
+
+// Initialize on page load
+window.addEventListener('DOMContentLoaded', async () => {
+    // Auto-load default case
+    setTimeout(() => {
+        loadDefaultCase();
+    }, 500);
+});
+
+async function loadDefaultCase() {
+    try {
+        const response = await fetch('/api/cases/1-0102-004');
+        const caseData = await response.json();
+        await loadCase(caseData);
+    } catch (error) {
+        console.error('Error loading default case:', error);
+    }
+}
+
+async function loadCase(caseData) {
+    currentCase = caseData;
+
+    // Show controls
+    document.getElementById('viewerControlsInline').style.display = 'flex';
+    document.getElementById('caseId').textContent = caseData.id;
+
+    // Load video
+    loadVideo(caseData.video);
+
+    // Display clinical data
+    displaySubjectInfo(caseData);
+    displayFamilyInfo(caseData);
+    displaySampleInfo(caseData);
+    displayClinicalScores(caseData);
+}
+
+function loadVideo(videoUrl) {
+    // Extract video ID from YouTube URL
+    const videoId = extractVideoId(videoUrl);
+
+    if (!videoId) {
+        console.error('Invalid video URL');
+        return;
+    }
+
+    // Destroy existing player if any
+    if (player) {
+        player.destroy();
+    }
+
+    // Create new player
+    player = new YT.Player('videoPlayer', {
+        height: '100%',
+        width: '100%',
+        videoId: videoId,
+        playerVars: {
+            'playsinline': 1,
+            'rel': 0,
+            'modestbranding': 1
+        },
+        events: {
+            'onReady': onPlayerReady
+        }
+    });
+}
+
+function extractVideoId(url) {
+    // Handle various YouTube URL formats
+    const patterns = [
+        /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/,
+        /^([a-zA-Z0-9_-]{11})$/
+    ];
+
+    for (const pattern of patterns) {
+        const match = url.match(pattern);
+        if (match) {
+            return match[1];
+        }
+    }
+    return null;
+}
+
+function onPlayerReady(event) {
+    console.log('Player ready');
+}
+
+function changeSpeed() {
+    const speed = parseFloat(document.getElementById('speedControl').value);
+    if (player && player.setPlaybackRate) {
+        player.setPlaybackRate(speed);
+    }
+}
+
+function displaySubjectInfo(caseData) {
+    const container = document.getElementById('subjectInfo');
+    container.innerHTML = `
+        <div class="info-row">
+            <span class="info-label">Index ID</span>
+            <span class="info-value">${caseData.id}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Date of Birth</span>
+            <span class="info-value">${caseData.dob}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Sex</span>
+            <span class="info-value">${caseData.sex}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Affection</span>
+            <span class="info-value">${caseData.affection}</span>
+        </div>
+    `;
+}
+
+function displayFamilyInfo(caseData) {
+    const container = document.getElementById('familyInfo');
+    container.innerHTML = `
+        <div class="info-row">
+            <span class="info-label">Family ID</span>
+            <span class="info-value">${caseData.familyId}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Family Type</span>
+            <span class="info-value">${caseData.familyType}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Mother ID</span>
+            <span class="info-value">${caseData.motherId}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Father ID</span>
+            <span class="info-value">${caseData.fatherId}</span>
+        </div>
+    `;
+}
+
+function displaySampleInfo(caseData) {
+    const container = document.getElementById('sampleInfo');
+    container.innerHTML = `
+        <div class="info-row">
+            <span class="info-label">Submitted ID</span>
+            <span class="info-value">${caseData.sample.submittedId}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Index ID</span>
+            <span class="info-value">${caseData.sample.indexId}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">DNA Source</span>
+            <span class="info-value">${caseData.sample.dnaSource}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Platform</span>
+            <span class="info-value">${caseData.sample.platform}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Predicted Ancestry</span>
+            <span class="info-value">${caseData.sample.predictedAncestry}</span>
+        </div>
+    `;
+}
+
+function displayClinicalScores(caseData) {
+    const container = document.getElementById('clinicalScores');
+
+    const scores = [
+        { name: 'ADOS', value: caseData.scores.ados },
+        { name: 'ADI-R', value: caseData.scores.adi },
+        { name: 'Vineland', value: caseData.scores.vineland }
+    ];
+
+    container.innerHTML = scores.map(score => `
+        <div class="score-item">
+            <div class="score-name">${score.name}</div>
+            <div class="score-value ${score.value === null ? 'score-na' : ''}">
+                ${score.value !== null ? score.value : 'Not Available'}
+            </div>
+        </div>
+    `).join('');
+}
+
+async function openCaseSelector() {
+    try {
+        const response = await fetch('/api/cases');
+        const cases = await response.json();
+
+        const container = document.getElementById('caseList');
+        container.innerHTML = cases.map(c => `
+            <div class="case-item" onclick='selectCase(${JSON.stringify(c).replace(/'/g, "&apos;")})'>
+                <div class="case-id">${c.subject}</div>
+                <div class="case-info">${c.sex} · ${c.dob}</div>
+                <div class="case-info">${c.familyType} · ${c.sample.predictedAncestry}</div>
+            </div>
+        `).join('');
+
+        document.getElementById('caseSidebar').style.display = 'flex';
+    } catch (error) {
+        console.error('Error loading cases:', error);
+    }
+}
+
+function selectCase(caseData) {
+    loadCase(caseData);
+    closeSidebar();
+}
+
+function closeSidebar() {
+    document.getElementById('caseSidebar').style.display = 'none';
+}
