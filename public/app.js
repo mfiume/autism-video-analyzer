@@ -4,6 +4,10 @@
 
 let player;
 let currentCase = null;
+let markIn = null;
+let markOut = null;
+let clips = [];
+let notes = [];
 
 // YouTube API Ready callback
 function onYouTubeIframeAPIReady() {
@@ -218,4 +222,172 @@ function selectCase(caseData) {
 
 function closeSidebar() {
     document.getElementById('caseSidebar').style.display = 'none';
+}
+
+// Mark In/Out Functions
+function setMarkIn() {
+    if (!player || !player.getCurrentTime) return;
+    markIn = player.getCurrentTime();
+    updateMarkDisplay();
+    console.log('Mark In set at:', formatTimecode(markIn));
+}
+
+function setMarkOut() {
+    if (!player || !player.getCurrentTime) return;
+    markOut = player.getCurrentTime();
+    updateMarkDisplay();
+    console.log('Mark Out set at:', formatTimecode(markOut));
+}
+
+function clearMarks() {
+    markIn = null;
+    markOut = null;
+    updateMarkDisplay();
+}
+
+function updateMarkDisplay() {
+    const markInDisplay = document.getElementById('markInDisplay');
+    const markOutDisplay = document.getElementById('markOutDisplay');
+
+    if (markInDisplay) {
+        markInDisplay.textContent = markIn !== null ? formatTimecode(markIn) : '--:--';
+    }
+    if (markOutDisplay) {
+        markOutDisplay.textContent = markOut !== null ? formatTimecode(markOut) : '--:--';
+    }
+
+    // Enable/disable create clip button
+    const createClipBtn = document.getElementById('createClipBtn');
+    if (createClipBtn) {
+        createClipBtn.disabled = (markIn === null || markOut === null);
+    }
+}
+
+function formatTimecode(seconds) {
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    const ms = Math.floor((seconds % 1) * 100);
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}.${ms.toString().padStart(2, '0')}`;
+}
+
+function createClip() {
+    if (markIn === null || markOut === null) {
+        alert('Please set both Mark In and Mark Out');
+        return;
+    }
+
+    if (markIn >= markOut) {
+        alert('Mark In must be before Mark Out');
+        return;
+    }
+
+    // Show clip naming dialog
+    const clipName = prompt('Enter clip name:', `Clip ${clips.length + 1}`);
+    if (!clipName) return;
+
+    const clip = {
+        id: Date.now(),
+        name: clipName,
+        markIn: markIn,
+        markOut: markOut,
+        duration: markOut - markIn,
+        timestamp: new Date().toISOString()
+    };
+
+    clips.push(clip);
+    displayClips();
+    clearMarks();
+}
+
+function displayClips() {
+    const container = document.getElementById('clipsList');
+    if (!container) return;
+
+    if (clips.length === 0) {
+        container.innerHTML = '<p style="color: #86868b; padding: 12px; text-align: center;">No clips created yet</p>';
+        return;
+    }
+
+    container.innerHTML = clips.map(clip => `
+        <div class="clip-item">
+            <div class="clip-header">
+                <span class="clip-name">${clip.name}</span>
+                <button class="clip-delete" onclick="deleteClip(${clip.id})" title="Delete clip">×</button>
+            </div>
+            <div class="clip-timecode">
+                ${formatTimecode(clip.markIn)} → ${formatTimecode(clip.markOut)}
+            </div>
+            <div class="clip-duration">
+                Duration: ${formatTimecode(clip.duration)}
+            </div>
+            <button class="clip-goto" onclick="gotoClip(${clip.markIn})">Go to Clip</button>
+        </div>
+    `).join('');
+}
+
+function deleteClip(clipId) {
+    if (!confirm('Delete this clip?')) return;
+    clips = clips.filter(c => c.id !== clipId);
+    displayClips();
+}
+
+function gotoClip(time) {
+    if (player && player.seekTo) {
+        player.seekTo(time);
+    }
+}
+
+// Notes Functions
+function addNote() {
+    if (!player || !player.getCurrentTime) return;
+
+    const noteText = prompt('Enter note:');
+    if (!noteText || noteText.trim() === '') return;
+
+    const note = {
+        id: Date.now(),
+        text: noteText.trim(),
+        timecode: player.getCurrentTime(),
+        timestamp: new Date().toISOString()
+    };
+
+    notes.push(note);
+    displayNotes();
+}
+
+function displayNotes() {
+    const container = document.getElementById('notesList');
+    if (!container) return;
+
+    if (notes.length === 0) {
+        container.innerHTML = '<p style="color: #86868b; padding: 12px; text-align: center;">No notes yet</p>';
+        return;
+    }
+
+    // Sort notes by timecode
+    const sortedNotes = [...notes].sort((a, b) => a.timecode - b.timecode);
+
+    container.innerHTML = sortedNotes.map(note => `
+        <div class="note-item">
+            <div class="note-header">
+                <span class="note-timecode" onclick="gotoClip(${note.timecode})" style="cursor: pointer;">
+                    ${formatTimecode(note.timecode)}
+                </span>
+                <button class="note-delete" onclick="deleteNote(${note.id})" title="Delete note">×</button>
+            </div>
+            <div class="note-text">${escapeHtml(note.text)}</div>
+        </div>
+    `).join('');
+}
+
+function deleteNote(noteId) {
+    if (!confirm('Delete this note?')) return;
+    notes = notes.filter(n => n.id !== noteId);
+    displayNotes();
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
 }
