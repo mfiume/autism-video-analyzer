@@ -386,6 +386,27 @@ body {
     border-color: #42947A;
 }
 
+.control-btn {
+    background: #f5f7fa;
+    color: #86868b;
+    border: 0.5px solid rgba(0, 0, 0, 0.08);
+    border-radius: 6px;
+    width: 36px;
+    height: 36px;
+    cursor: pointer;
+    font-size: 0.875rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.control-btn:hover {
+    background: #e8ecf1;
+    color: #42947A;
+    border-color: #42947A;
+}
+
 .time-display {
     font-size: 0.875rem;
     font-weight: 600;
