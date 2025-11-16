@@ -19,7 +19,7 @@ Subject: **1-0102-004**
 - Affection: 2
 - Family Type: SPX
 - Ancestry: EUR
-- Video: https://www.youtube.com/watch?v=x3aqed6EZE0
+- Video: https://www.youtube.com/watch?v=US90ZQyKHR8
 
 ## Usage
 

@@ -35,7 +35,7 @@ app.get('/api/cases', (req, res) => {
                 platform: 'Complete Genomics',
                 predictedAncestry: 'EUR'
             },
-            video: 'https://www.youtube.com/watch?v=x3aqed6EZE0',
+            video: 'https://www.youtube.com/watch?v=US90ZQyKHR8',
             scores: {
                 ados: null,
                 adi: null,
