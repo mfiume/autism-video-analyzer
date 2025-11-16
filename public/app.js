@@ -307,6 +307,9 @@ function createClip() {
     clips.push(clip);
     displayClips();
     clearMarks();
+
+    // Automatically switch to Clips tab to show the new clip
+    switchTabByName('clips');
 }
 
 function displayClips() {
@@ -363,6 +366,9 @@ function addNote() {
 
     notes.push(note);
     displayNotes();
+
+    // Automatically switch to Notes tab to show the new note
+    switchTabByName('notes');
 }
 
 function displayNotes() {
@@ -426,6 +432,22 @@ function switchTab(tabName) {
         selectedTab.classList.add('active');
     }
 
-    // Activate selected button
-    event.target.classList.add('active');
+    // Activate selected button (if clicked from UI)
+    if (event && event.target) {
+        event.target.classList.add('active');
+    } else {
+        // Programmatically activate button based on tab name
+        const buttons = document.querySelectorAll('.tab-button');
+        buttons.forEach((button, index) => {
+            const buttonTabs = ['subject', 'clips', 'notes'];
+            if (buttonTabs[index] === tabName) {
+                button.classList.add('active');
+            }
+        });
+    }
+}
+
+// Helper function for programmatic tab switching
+function switchTabByName(tabName) {
+    switchTab.call(null, tabName);
 }
