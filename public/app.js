@@ -162,13 +162,6 @@ function restartVideo() {
     if (btn) btn.textContent = '⏸';
 }
 
-function skipToEnd() {
-    if (!player || videoDuration === 0) return;
-    // Seek to 5 seconds before the end
-    const endTime = Math.max(0, videoDuration - 5);
-    player.seekTo(endTime);
-}
-
 function formatTime(seconds) {
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
