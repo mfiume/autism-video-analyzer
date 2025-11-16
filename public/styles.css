@@ -554,7 +554,7 @@ body {
 }
 
 .analyze-btn {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #42947A;
     color: #ffffff;
     border: none;
     border-radius: 8px;
@@ -569,12 +569,13 @@ body {
     align-items: center;
     justify-content: center;
     gap: 8px;
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    box-shadow: 0 4px 12px rgba(66, 148, 122, 0.3);
 }
 
 .analyze-btn:hover {
+    background: #52A88D;
     transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 6px 16px rgba(66, 148, 122, 0.4);
 }
 
 .analyze-btn:active {
@@ -638,7 +639,7 @@ body {
 }
 
 .timestamp-category {
-    color: #667eea;
+    color: #42947A;
     font-size: 0.75rem;
     font-weight: 600;
     text-transform: uppercase;
