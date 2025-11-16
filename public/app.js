@@ -8,6 +8,8 @@ let markIn = null;
 let markOut = null;
 let clips = [];
 let notes = [];
+let videoDuration = 0;
+let playheadInterval = null;
 
 // YouTube API Ready callback
 function onYouTubeIframeAPIReady() {
@@ -97,6 +99,12 @@ function extractVideoId(url) {
 
 function onPlayerReady(event) {
     console.log('Player ready');
+
+    // Get video duration
+    videoDuration = player.getDuration();
+
+    // Start updating playhead position
+    startPlayheadUpdates();
 }
 
 function changeSpeed() {
@@ -318,24 +326,26 @@ function displayClips() {
 
     if (clips.length === 0) {
         container.innerHTML = '<p style="color: #86868b; padding: 12px; text-align: center;">No clips created yet</p>';
-        return;
+    } else {
+        container.innerHTML = clips.map(clip => `
+            <div class="clip-item">
+                <div class="clip-header">
+                    <span class="clip-name">${clip.name}</span>
+                    <button class="clip-delete" onclick="deleteClip(${clip.id})" title="Delete clip">×</button>
+                </div>
+                <div class="clip-timecode">
+                    ${formatTimecode(clip.markIn)} → ${formatTimecode(clip.markOut)}
+                </div>
+                <div class="clip-duration">
+                    Duration: ${formatTimecode(clip.duration)}
+                </div>
+                <button class="clip-goto" onclick="gotoClip(${clip.markIn})">Go to Clip</button>
+            </div>
+        `).join('');
     }
 
-    container.innerHTML = clips.map(clip => `
-        <div class="clip-item">
-            <div class="clip-header">
-                <span class="clip-name">${clip.name}</span>
-                <button class="clip-delete" onclick="deleteClip(${clip.id})" title="Delete clip">×</button>
-            </div>
-            <div class="clip-timecode">
-                ${formatTimecode(clip.markIn)} → ${formatTimecode(clip.markOut)}
-            </div>
-            <div class="clip-duration">
-                Duration: ${formatTimecode(clip.duration)}
-            </div>
-            <button class="clip-goto" onclick="gotoClip(${clip.markIn})">Go to Clip</button>
-        </div>
-    `).join('');
+    // Update timeline markers
+    updateTimeline();
 }
 
 function deleteClip(clipId) {
@@ -377,23 +387,25 @@ function displayNotes() {
 
     if (notes.length === 0) {
         container.innerHTML = '<p style="color: #86868b; padding: 12px; text-align: center;">No notes yet</p>';
-        return;
+    } else {
+        // Sort notes by timecode
+        const sortedNotes = [...notes].sort((a, b) => a.timecode - b.timecode);
+
+        container.innerHTML = sortedNotes.map(note => `
+            <div class="note-item">
+                <div class="note-header">
+                    <span class="note-timecode" onclick="gotoClip(${note.timecode})" style="cursor: pointer;">
+                        ${formatTimecode(note.timecode)}
+                    </span>
+                    <button class="note-delete" onclick="deleteNote(${note.id})" title="Delete note">×</button>
+                </div>
+                <div class="note-text">${escapeHtml(note.text)}</div>
+            </div>
+        `).join('');
     }
 
-    // Sort notes by timecode
-    const sortedNotes = [...notes].sort((a, b) => a.timecode - b.timecode);
-
-    container.innerHTML = sortedNotes.map(note => `
-        <div class="note-item">
-            <div class="note-header">
-                <span class="note-timecode" onclick="gotoClip(${note.timecode})" style="cursor: pointer;">
-                    ${formatTimecode(note.timecode)}
-                </span>
-                <button class="note-delete" onclick="deleteNote(${note.id})" title="Delete note">×</button>
-            </div>
-            <div class="note-text">${escapeHtml(note.text)}</div>
-        </div>
-    `).join('');
+    // Update timeline markers
+    updateTimeline();
 }
 
 function deleteNote(noteId) {
@@ -450,4 +462,54 @@ function switchTab(tabName) {
 // Helper function for programmatic tab switching
 function switchTabByName(tabName) {
     switchTab.call(null, tabName);
+}
+
+// Timeline Functions
+function updateTimeline() {
+    const container = document.getElementById('timelineMarkers');
+    if (!container || videoDuration === 0) return;
+
+    container.innerHTML = '';
+
+    // Add clip markers
+    clips.forEach(clip => {
+        const marker = document.createElement('div');
+        marker.className = 'timeline-marker clip-marker';
+        marker.style.left = `${(clip.markIn / videoDuration) * 100}%`;
+        marker.setAttribute('data-label', clip.name);
+        marker.onclick = () => gotoClip(clip.markIn);
+        container.appendChild(marker);
+    });
+
+    // Add note markers
+    notes.forEach(note => {
+        const marker = document.createElement('div');
+        marker.className = 'timeline-marker note-marker';
+        marker.style.left = `${(note.timecode / videoDuration) * 100}%`;
+        marker.setAttribute('data-label', `Note: ${formatTimecode(note.timecode)}`);
+        marker.onclick = () => gotoClip(note.timecode);
+        container.appendChild(marker);
+    });
+}
+
+function updatePlayhead() {
+    if (!player || !player.getCurrentTime || videoDuration === 0) return;
+
+    const currentTime = player.getCurrentTime();
+    const playhead = document.getElementById('playheadPosition');
+
+    if (playhead) {
+        const percentage = (currentTime / videoDuration) * 100;
+        playhead.style.left = `${percentage}%`;
+    }
+}
+
+function startPlayheadUpdates() {
+    // Clear existing interval if any
+    if (playheadInterval) {
+        clearInterval(playheadInterval);
+    }
+
+    // Update playhead position every 100ms
+    playheadInterval = setInterval(updatePlayhead, 100);
 }
