@@ -498,7 +498,8 @@ function switchTab(tabName) {
     const tabMap = {
         'subject': 'subjectTab',
         'clips': 'clipsTab',
-        'notes': 'notesTab'
+        'notes': 'notesTab',
+        'analysis': 'analysisTab'
     };
 
     const selectedTab = document.getElementById(tabMap[tabName]);
@@ -513,7 +514,7 @@ function switchTab(tabName) {
         // Programmatically activate button based on tab name
         const buttons = document.querySelectorAll('.tab-button');
         buttons.forEach((button, index) => {
-            const buttonTabs = ['subject', 'clips', 'notes'];
+            const buttonTabs = ['subject', 'clips', 'notes', 'analysis'];
             if (buttonTabs[index] === tabName) {
                 button.classList.add('active');
             }
@@ -595,4 +596,83 @@ function startPlayheadUpdates() {
 
     // Update playhead position every 100ms
     playheadInterval = setInterval(updatePlayhead, 100);
+}
+
+// Analysis Functions
+function generateAnalysis() {
+    const btn = document.getElementById('analyzeBtn');
+    btn.classList.add('analyzing');
+    btn.innerHTML = '<span class="btn-icon">⏳</span> Analyzing...';
+    btn.disabled = true;
+
+    // Simulate AI analysis with a delay
+    setTimeout(() => {
+        displayAnalysisResults();
+        btn.classList.remove('analyzing');
+        btn.innerHTML = '<span class="btn-icon">✨</span> Generate AI Analysis';
+        btn.disabled = false;
+    }, 2000);
+}
+
+function displayAnalysisResults() {
+    // Show results sections
+    document.getElementById('analysisResults').style.display = 'block';
+    document.getElementById('timestampsSection').style.display = 'block';
+
+    // Display summary
+    const summaryContainer = document.getElementById('analysisSummary');
+    summaryContainer.innerHTML = `
+        <p>This autism assessment session demonstrates a comprehensive evaluation of social communication, repetitive behaviors, and adaptive functioning. The subject shows variable engagement patterns throughout the 14:50 minute session, with notable differences in response to structured versus unstructured interaction approaches.</p>
+        <p style="margin-top: 12px;">Key behavioral observations include reduced eye contact during the initial greeting phase (00:45-02:15), improved reciprocal communication during play-based activities (05:30-08:45), and increased repetitive motor movements during transitions (10:20-11:40).</p>
+    `;
+
+    // Display timestamps
+    const timestampsContainer = document.getElementById('timestampsList');
+    const mockTimestamps = [
+        {
+            time: 45,
+            category: 'Social Communication',
+            description: 'Initial greeting - limited eye contact and delayed response to name'
+        },
+        {
+            time: 135,
+            category: 'Engagement',
+            description: 'Subject shows interest in toy, demonstrates joint attention'
+        },
+        {
+            time: 330,
+            category: 'Social Interaction',
+            description: 'Reciprocal play initiated - sharing toys and taking turns'
+        },
+        {
+            time: 525,
+            category: 'Communication',
+            description: 'Verbal communication emerges - requests and labels objects'
+        },
+        {
+            time: 620,
+            category: 'Repetitive Behavior',
+            description: 'Hand flapping observed during exciting activity'
+        },
+        {
+            time: 700,
+            category: 'Adaptive Behavior',
+            description: 'Demonstrates problem-solving skills with puzzle activity'
+        },
+        {
+            time: 815,
+            category: 'Social Communication',
+            description: 'Decreased eye contact during unstructured free play'
+        }
+    ];
+
+    timestampsContainer.innerHTML = mockTimestamps.map(ts => `
+        <div class="timestamp-item" onclick="gotoClip(${ts.time})">
+            <div class="timestamp-time">
+                <span class="timestamp-badge">${formatTimecode(ts.time)}</span>
+                <span class="timestamp-category">${ts.category}</span>
+            </div>
+            <div class="timestamp-description">${ts.description}</div>
+        </div>
+    `).join('');
 }

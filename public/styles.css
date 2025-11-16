@@ -526,6 +526,110 @@ body {
     background: #52A88D;
 }
 
+/* Analysis Tab */
+.analysis-controls {
+    display: flex;
+    flex-direction: column;
+}
+
+.analyze-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    padding: 14px 20px;
+    cursor: pointer;
+    font-size: 0.875rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    font-family: inherit;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.analyze-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+}
+
+.analyze-btn:active {
+    transform: translateY(0);
+}
+
+.analyze-btn.analyzing {
+    background: #86868b;
+    cursor: wait;
+}
+
+.btn-icon {
+    font-size: 1.125rem;
+}
+
+.analysis-summary {
+    background: #f5f7fa;
+    border-radius: 8px;
+    padding: 16px;
+    border: 0.5px solid rgba(0, 0, 0, 0.06);
+    line-height: 1.6;
+    color: #1d1d1f;
+    font-size: 0.875rem;
+}
+
+.timestamps-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.timestamp-item {
+    padding: 12px 14px;
+    background: #f5f7fa;
+    border-radius: 8px;
+    border: 0.5px solid rgba(0, 0, 0, 0.06);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.timestamp-item:hover {
+    background: #e8ecf1;
+    border-color: #42947A;
+}
+
+.timestamp-time {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+
+.timestamp-badge {
+    background: #42947A;
+    color: #ffffff;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+.timestamp-category {
+    color: #667eea;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.timestamp-description {
+    color: #1d1d1f;
+    font-size: 0.8125rem;
+    line-height: 1.4;
+}
+
 /* Clinical Panel */
 .clinical-panel {
     width: 400px;
