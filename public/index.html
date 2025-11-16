@@ -47,7 +47,7 @@
 
                 <!-- Timeline -->
                 <div class="timeline-container">
-                    <div class="timeline-track">
+                    <div class="timeline-track" onclick="onTimelineClick(event)">
                         <div id="timelineMarkers" class="timeline-markers"></div>
                         <div id="playheadPosition" class="playhead"></div>
                     </div>
@@ -55,7 +55,9 @@
 
                 <div class="video-controls">
                     <div class="playback-controls">
+                        <button onclick="skipBackward()" class="skip-btn" title="Backward 5s">⏪</button>
                         <button id="playPauseBtn" onclick="togglePlayPause()" title="Play/Pause">▶</button>
+                        <button onclick="skipForward()" class="skip-btn" title="Forward 5s">⏩</button>
                         <span id="currentTime" class="time-display">00:00</span>
                         <span class="time-separator">/</span>
                         <span id="totalTime" class="time-display">00:00</span>

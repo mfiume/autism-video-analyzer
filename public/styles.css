@@ -249,6 +249,7 @@ body {
     background: #f5f7fa;
     border-radius: 6px;
     overflow: visible;
+    cursor: pointer;
 }
 
 .timeline-markers {
@@ -363,6 +364,26 @@ body {
 
 #playPauseBtn:hover {
     background: #52A88D;
+}
+
+.skip-btn {
+    background: #f5f7fa;
+    color: #42947A;
+    border: 0.5px solid rgba(0, 0, 0, 0.08);
+    border-radius: 6px;
+    width: 36px;
+    height: 36px;
+    cursor: pointer;
+    font-size: 0.875rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.skip-btn:hover {
+    background: #e8ecf1;
+    border-color: #42947A;
 }
 
 .time-display {

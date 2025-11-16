@@ -122,18 +122,36 @@ function changeSpeed() {
 }
 
 function togglePlayPause() {
-    if (!player || !player.getPlayerState) return;
+    if (!player) return;
 
-    const state = player.getPlayerState();
     const btn = document.getElementById('playPauseBtn');
 
-    if (state === YT.PlayerState.PLAYING) {
-        player.pauseVideo();
-        btn.textContent = '▶';
-    } else {
-        player.playVideo();
-        btn.textContent = '⏸';
+    try {
+        const state = player.getPlayerState();
+
+        if (state === 1) {  // 1 = PLAYING
+            player.pauseVideo();
+            btn.textContent = '▶';
+        } else {
+            player.playVideo();
+            btn.textContent = '⏸';
+        }
+    } catch (e) {
+        console.error('Error toggling play/pause:', e);
     }
+}
+
+function skipBackward() {
+    if (!player || !player.getCurrentTime) return;
+    const currentTime = player.getCurrentTime();
+    player.seekTo(Math.max(0, currentTime - 5));
+}
+
+function skipForward() {
+    if (!player || !player.getCurrentTime) return;
+    const currentTime = player.getCurrentTime();
+    const newTime = Math.min(videoDuration, currentTime + 5);
+    player.seekTo(newTime);
 }
 
 function formatTime(seconds) {
@@ -521,7 +539,10 @@ function updateTimeline() {
         marker.className = 'timeline-marker clip-marker';
         marker.style.left = `${(clip.markIn / videoDuration) * 100}%`;
         marker.setAttribute('data-label', clip.name);
-        marker.onclick = () => gotoClip(clip.markIn);
+        marker.onclick = (e) => {
+            e.stopPropagation();
+            gotoClip(clip.markIn);
+        };
         container.appendChild(marker);
     });
 
@@ -531,9 +552,24 @@ function updateTimeline() {
         marker.className = 'timeline-marker note-marker';
         marker.style.left = `${(note.timecode / videoDuration) * 100}%`;
         marker.setAttribute('data-label', `Note: ${formatTimecode(note.timecode)}`);
-        marker.onclick = () => gotoClip(note.timecode);
+        marker.onclick = (e) => {
+            e.stopPropagation();
+            gotoClip(note.timecode);
+        };
         container.appendChild(marker);
     });
+}
+
+function onTimelineClick(event) {
+    if (!player || videoDuration === 0) return;
+
+    const track = document.querySelector('.timeline-track');
+    const rect = track.getBoundingClientRect();
+    const clickX = event.clientX - rect.left;
+    const percentage = clickX / rect.width;
+    const seekTime = percentage * videoDuration;
+
+    player.seekTo(seekTime);
 }
 
 function updatePlayhead() {
