@@ -73,7 +73,11 @@ function loadVideo(videoUrl) {
         playerVars: {
             'playsinline': 1,
             'rel': 0,
-            'modestbranding': 1
+            'modestbranding': 1,
+            'controls': 0,  // Hide YouTube controls
+            'disablekb': 1,  // Disable keyboard controls
+            'fs': 0,  // Hide fullscreen button
+            'iv_load_policy': 3  // Hide annotations
         },
         events: {
             'onReady': onPlayerReady
@@ -103,6 +107,9 @@ function onPlayerReady(event) {
     // Get video duration
     videoDuration = player.getDuration();
 
+    // Update total time display
+    updateTimeDisplay();
+
     // Start updating playhead position
     startPlayheadUpdates();
 }
@@ -111,6 +118,43 @@ function changeSpeed() {
     const speed = parseFloat(document.getElementById('speedControl').value);
     if (player && player.setPlaybackRate) {
         player.setPlaybackRate(speed);
+    }
+}
+
+function togglePlayPause() {
+    if (!player || !player.getPlayerState) return;
+
+    const state = player.getPlayerState();
+    const btn = document.getElementById('playPauseBtn');
+
+    if (state === YT.PlayerState.PLAYING) {
+        player.pauseVideo();
+        btn.textContent = '▶';
+    } else {
+        player.playVideo();
+        btn.textContent = '⏸';
+    }
+}
+
+function formatTime(seconds) {
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+}
+
+function updateTimeDisplay() {
+    if (!player || !player.getCurrentTime) return;
+
+    const currentTime = player.getCurrentTime();
+    const currentTimeEl = document.getElementById('currentTime');
+    const totalTimeEl = document.getElementById('totalTime');
+
+    if (currentTimeEl) {
+        currentTimeEl.textContent = formatTime(currentTime);
+    }
+
+    if (totalTimeEl && videoDuration) {
+        totalTimeEl.textContent = formatTime(videoDuration);
     }
 }
 
@@ -502,6 +546,9 @@ function updatePlayhead() {
         const percentage = (currentTime / videoDuration) * 100;
         playhead.style.left = `${percentage}%`;
     }
+
+    // Also update time display
+    updateTimeDisplay();
 }
 
 function startPlayheadUpdates() {
