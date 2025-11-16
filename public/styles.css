@@ -298,12 +298,55 @@ body {
     overflow: hidden;
 }
 
+/* Panel Tabs */
+.panel-tabs {
+    display: flex;
+    gap: 4px;
+    padding: 8px 8px 0 8px;
+    background: #ffffff;
+    border: 0.5px solid rgba(0, 0, 0, 0.08);
+    border-bottom: none;
+    border-radius: 16px 16px 0 0;
+}
+
+.tab-button {
+    flex: 1;
+    padding: 10px 16px;
+    background: transparent;
+    border: none;
+    border-radius: 8px 8px 0 0;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: #86868b;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: inherit;
+}
+
+.tab-button:hover {
+    background: rgba(66, 148, 122, 0.08);
+    color: #42947A;
+}
+
+.tab-button.active {
+    background: #42947A;
+    color: #ffffff;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
 .clinical-content {
     flex: 1;
     overflow-y: auto;
     background: #ffffff;
     border: 0.5px solid rgba(0, 0, 0, 0.08);
-    border-radius: 16px;
+    border-radius: 0 0 16px 16px;
     padding: 20px;
 }
 

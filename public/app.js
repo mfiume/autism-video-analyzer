@@ -178,6 +178,7 @@ function displaySampleInfo(caseData) {
 
 function displayClinicalScores(caseData) {
     const container = document.getElementById('clinicalScores');
+    const section = document.getElementById('clinicalScoresSection');
 
     const scores = [
         { name: 'ADOS', value: caseData.scores.ados },
@@ -185,14 +186,23 @@ function displayClinicalScores(caseData) {
         { name: 'Vineland', value: caseData.scores.vineland }
     ];
 
-    container.innerHTML = scores.map(score => `
-        <div class="score-item">
-            <div class="score-name">${score.name}</div>
-            <div class="score-value ${score.value === null ? 'score-na' : ''}">
-                ${score.value !== null ? score.value : 'Not Available'}
+    // Only show section if at least one score is available
+    const hasAvailableScores = scores.some(score => score.value !== null);
+
+    if (!hasAvailableScores) {
+        section.style.display = 'none';
+        return;
+    }
+
+    section.style.display = 'block';
+    container.innerHTML = scores
+        .filter(score => score.value !== null)
+        .map(score => `
+            <div class="score-item">
+                <div class="score-name">${score.name}</div>
+                <div class="score-value">${score.value}</div>
             </div>
-        </div>
-    `).join('');
+        `).join('');
 }
 
 async function openCaseSelector() {
@@ -390,4 +400,32 @@ function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
+}
+
+// Tab Switching
+function switchTab(tabName) {
+    // Hide all tab contents
+    document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+    });
+
+    // Remove active class from all buttons
+    document.querySelectorAll('.tab-button').forEach(button => {
+        button.classList.remove('active');
+    });
+
+    // Show selected tab content
+    const tabMap = {
+        'subject': 'subjectTab',
+        'clips': 'clipsTab',
+        'notes': 'notesTab'
+    };
+
+    const selectedTab = document.getElementById(tabMap[tabName]);
+    if (selectedTab) {
+        selectedTab.classList.add('active');
+    }
+
+    // Activate selected button
+    event.target.classList.add('active');
 }
